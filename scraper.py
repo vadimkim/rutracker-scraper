@@ -79,12 +79,15 @@ def scraper(db):
 
 if __name__ == "__main__":
     conn = None
-    try:
-        conn = sqlite3.connect("rutracker.sqlite")
-        print(sqlite3.sqlite_version)
-        scraper(conn)
-    except sqlite3.Error as e:
-        print(e)
-    finally:
-        if conn:
-            conn.close()
+    with open('sql/tables.sql', 'r') as sql_file:
+        try:
+            conn = sqlite3.connect("rutracker.sqlite")
+            cur = conn.cursor()
+            cur.execute(sql_file.read())
+            conn.commit()
+            scraper(conn)
+        except sqlite3.Error as e:
+            print(e)
+        finally:
+            if conn:
+                conn.close()
