@@ -6,7 +6,7 @@ def insert_tracker(conn, page):
     conn.commit()
 
 def last_record(conn):
-    sql = 'SELECT max(id) from trackers'
+    sql = 'SELECT IFNULL(max(id),0) AS MAXID FROM trackers'
     cur = conn.cursor()
     cur.execute(sql)
     return cur.fetchone()[0]
