@@ -13,7 +13,7 @@ from database import insert_tracker, last_record
 
 page_link = "https://rutracker.org/forum/viewtopic.php?t={}"
 # fist magnet at topic = 2142
-topic_limit = 2_700_000
+topic_limit = 3_900_000
 
 class Page:
     def __init__(self, id, link, title, size, body):
@@ -25,7 +25,10 @@ class Page:
 
     def hash(self):
         magnet = self.link.split(":")
-        return magnet[3].split("&")[0]
+        if len(magnet) == 4:
+            return magnet[3].split("&")[0]
+        else:
+            return magnet[0]
 
 
 
@@ -37,15 +40,17 @@ def page(session, topic):
     html = response.text
     soup = BeautifulSoup(html, "html.parser")
     link = soup.find(lambda tag: tag.get("class") == ["magnet-link"])
+    title = soup.find(id="topic-title")
 
     if link is not None:
         download = soup.find(lambda tag: tag.get("class") == ["attach_link", "guest"]) # get Download block with 2 <li> elements
         size = download.find_all("li")[1].text.replace(" ", " ") # 2nd element is size
-        title = soup.find(id = "topic-title")
         post = soup.find(lambda tag: tag.get("class") == ["row1"])
         post_id = post.get("id").replace("post_", "p-")
         post_body = soup.find(id=post_id)
         return Page(topic, link.get("href"), title.text, size, post_body.text)
+    elif title is not None:
+        return Page(topic, "N/A", title.text, "N/A", "N/A")
     else:
         return "EMPTY"
 
