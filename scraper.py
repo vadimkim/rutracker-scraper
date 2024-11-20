@@ -4,15 +4,17 @@ import requests
 import random
 import sqlite3
 import time
+
 from tqdm import tqdm
 
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 
-from database import insert_tracker, last_record
+from database import *
 
 page_link = "https://rutracker.org/forum/viewtopic.php?t={}"
 # fist magnet at topic = 2142
+# from 3_800_000 is full, including N/A
 topic_limit = 3_900_000
 
 class Page:
@@ -63,8 +65,9 @@ def scraper(db):
         try:
             start = last_record(db)
             session = requests.Session()
+            empties = check_empties(conn, start, topic_limit) # modify range here if you wish to re-check some interval
 
-            for topic_number in tqdm(range(start + 1, topic_limit), desc="Run " + str(run + 1)):
+            for topic_number in tqdm(empties, desc="Run " + str(run + 1)):
                 result = page(session, topic_number)
                 if result != "EMPTY":
                     print("id:{0} {1} title:{2}".format(result.id, result.link, result.title))
