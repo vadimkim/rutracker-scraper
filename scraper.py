@@ -14,8 +14,8 @@ from database import *
 
 page_link = "https://rutracker.org/forum/viewtopic.php?t={}"
 # fist magnet at topic = 2142
-# from 3_800_000 is full, including N/A
-topic_limit = 3_900_000
+# from 3_800_000 and up to 100_000 is full, including N/A
+topic_limit = 4_100_000
 
 class Page:
     def __init__(self, id, link, title, size, body):
@@ -35,7 +35,7 @@ class Page:
 
 
 def page(session, topic):
-    response = session.get(url=page_link.format(topic),headers={'User-Agent': UserAgent().random, 'Content-Type': 'text/html; charset=utf-8'})
+    response = session.get(url=page_link.format(topic),headers={'User-Agent': UserAgent().random, 'Content-Type': 'text/html; charset=utf-8'}, timeout=10)
     if not response.ok:
         return "ERROR"
 
