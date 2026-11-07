@@ -1,5 +1,6 @@
 from http.client import RemoteDisconnected
 
+import os
 import random
 import sqlite3
 import time
@@ -20,6 +21,9 @@ topic_limit = 4_100_000
 # Real Chrome profile used to pass the Cloudflare challenge. It is kept between runs,
 # so the challenge usually needs to be solved only once in a while.
 browser_profile = "browser_profile"
+# Browser that solves the challenge: installed Google Chrome by default, or the path to another
+# Chrome/Chromium executable from BROWSER_PATH env variable, e.g. BROWSER_PATH=/usr/bin/chromium
+browser_path = os.environ.get("BROWSER_PATH")
 challenge_timeout = 60 # seconds to wait for the browser to pass the challenge
 # Checks DOM only: patchright evaluates JS in an isolated world, so page globals are not visible
 challenge_passed_js = """document.readyState === 'complete'
@@ -73,7 +77,8 @@ class CloudflareSession:
         print("Cloudflare challenge detected, solving it in Chrome (if a checkbox appears in the window, click it)...")
         with sync_playwright() as p:
             # Headless Chrome is detected by Cloudflare, so a real window is opened
-            context = p.chromium.launch_persistent_context(browser_profile, channel="chrome", headless=False, no_viewport=True)
+            browser = {"executable_path": browser_path} if browser_path else {"channel": "chrome"}
+            context = p.chromium.launch_persistent_context(browser_profile, headless=False, no_viewport=True, **browser)
             try:
                 page = context.pages[0] if context.pages else context.new_page()
                 page.goto(url, timeout=challenge_timeout * 1000)
