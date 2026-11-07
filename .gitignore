@@ -163,3 +163,5 @@ cython_debug/
 
 # DB is too big to save
 rutracker.sqlite
+# Chrome profile used to pass Cloudflare challenge
+browser_profile/
